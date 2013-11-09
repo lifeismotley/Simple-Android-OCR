@@ -4,5 +4,9 @@
 	<classpathentry kind="src" path="gen"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
+	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
+	<classpathentry kind="lib" path="/Users/justin/Downloads/adt-bundle-mac-x86_64-20131030/sdk/platforms/android-19/android.jar"/>
+	<classpathentry kind="lib" path="/Users/justin/Documents/workspace/Simple-Android-OCR/lib/apache-mime4j-0.6.jar"/>
+	<classpathentry kind="lib" path="/Users/justin/Documents/workspace/Simple-Android-OCR/lib/httpmime-4.3.1.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>
