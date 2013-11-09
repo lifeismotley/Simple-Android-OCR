@@ -40,6 +40,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 
 // HTTP POST stuff
@@ -237,6 +238,7 @@ public class SimpleAndroidOCRActivity extends Activity {
 
 		// _image.setImageBitmap( bitmap );
 
+		/*
 		Log.v(TAG, "Before baseApi");
 
 		// TessBaseAPI Stuff
@@ -266,209 +268,25 @@ public class SimpleAndroidOCRActivity extends Activity {
 					: _field.getText() + " " + recognizedText);
 			_field.setSelection(_field.getText().toString().length());
 		}
+		*/
 
 		// Cycle done.
 
 		// Preparing the image for sending
 		ByteArrayOutputStream stream = new ByteArrayOutputStream();
-		bitmap.compress(Bitmap.CompressFormat.PNG, 90, stream); // compress to
-																// which format
-																// you want.
+		bitmap.compress(Bitmap.CompressFormat.JPEG, 90, stream); // compress to
+																	// which
+																	// format
+																	// you want.
 		byte[] byte_arr = stream.toByteArray();
-		String image_str = Base64.encodeBytes(byte_arr);
-		ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-		nameValuePairs.add(new BasicNameValuePair("image", image_str));
-		
-		// Sending POST request
-		HttpClient httpclient = new DefaultHttpClient();
-        HttpPost httppost = new HttpPost("http://10.0.2.2/Upload_image_ANDROID/upload_image.php");
-        try {
-			httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-			HttpResponse response = httpclient.execute(httppost);
-			Log.i(TAG, getContent(response));
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ClientProtocolException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		 String image_str = Base64.encodeBytes(byte_arr);
 
-	}
+		Log.v(TAG, "We are good so far!");
 
-	
-	// taken from somewhere
-	public void post(String url, ArrayList<NameValuePair> nameValuePairs) {
-		HttpClient httpClient = new DefaultHttpClient();
-		HttpContext localContext = new BasicHttpContext();
-		HttpPost httpPost = new HttpPost(url);
-		try {
-			MultipartEntityBuilder entityBuilder = MultipartEntityBuilder
-					.create();
-			entityBuilder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+		AsyncHttpPost asyncHttpPost = new AsyncHttpPost(byte_arr);
+		asyncHttpPost.execute("http://54.201.9.111/process");
+		Log.v(TAG, "We are good so far 2!");
 
-			for (int index = 0; index < nameValuePairs.size(); index++) {
-				if (nameValuePairs.get(index).getName()
-						.equalsIgnoreCase("image")) { // If the key equals to
-														// "image", we use
-														// FileBody to transfer
-														// the data
-					entityBuilder.addPart(nameValuePairs.get(index).getName(),
-							new FileBody(new File(nameValuePairs.get(index)
-									.getValue())));
-				} else { // Normal string data
-					entityBuilder
-							.addPart(nameValuePairs.get(index).getName(),
-									new StringBody(nameValuePairs.get(index)
-											.getValue()));
-				}
-			}
-			httpPost.setEntity(entityBuilder.build());
-			HttpResponse response = httpClient.execute(httpPost, localContext);
-			Log.v(TAG, "The Post Reponse was: ");
-			Log.v(TAG, response.toString());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	// TAKEN FROM
-	// http://stackoverflow.com/questions/18964288/upload-a-file-through-an-http-form-via-multipartentitybuilder-with-a-progress
-	public static String postFile(String fileName, String userName,
-			String password, String macAddress) throws Exception {
-
-		HttpClient client = new DefaultHttpClient();
-		HttpPost post = new HttpPost(
-				"http://10.0.2.2/Upload_image_ANDROID/upload_image.php");
-		MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-		builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
-
-		final File file = new File(fileName);
-		FileBody fb = new FileBody(file);
-
-		builder.addPart("file", fb);
-		// builder.addTextBody("userName", userName);
-		// builder.addTextBody("password", password);
-		// builder.addTextBody("macAddress", macAddress);
-		final HttpEntity yourEntity = builder.build();
-
-		class ProgressiveEntity implements HttpEntity {
-			@Override
-			public void consumeContent() throws IOException {
-				yourEntity.consumeContent();
-			}
-
-			@Override
-			public InputStream getContent() throws IOException,
-					IllegalStateException {
-				return yourEntity.getContent();
-			}
-
-			@Override
-			public Header getContentEncoding() {
-				return yourEntity.getContentEncoding();
-			}
-
-			@Override
-			public long getContentLength() {
-				return yourEntity.getContentLength();
-			}
-
-			@Override
-			public Header getContentType() {
-				return yourEntity.getContentType();
-			}
-
-			@Override
-			public boolean isChunked() {
-				return yourEntity.isChunked();
-			}
-
-			@Override
-			public boolean isRepeatable() {
-				return yourEntity.isRepeatable();
-			}
-
-			@Override
-			public boolean isStreaming() {
-				return yourEntity.isStreaming();
-			} // CONSIDER put a _real_ delegator into here!
-
-			@Override
-			public void writeTo(OutputStream outstream) throws IOException {
-
-				class ProxyOutputStream extends FilterOutputStream {
-					/**
-					 * @author Stephen Colebourne
-					 */
-
-					public ProxyOutputStream(OutputStream proxy) {
-						super(proxy);
-					}
-
-					public void write(int idx) throws IOException {
-						out.write(idx);
-					}
-
-					public void write(byte[] bts) throws IOException {
-						out.write(bts);
-					}
-
-					public void write(byte[] bts, int st, int end)
-							throws IOException {
-						out.write(bts, st, end);
-					}
-
-					public void flush() throws IOException {
-						out.flush();
-					}
-
-					public void close() throws IOException {
-						out.close();
-					}
-				} // CONSIDER import this class (and risk more Jar File Hell)
-
-				class ProgressiveOutputStream extends ProxyOutputStream {
-					public ProgressiveOutputStream(OutputStream proxy) {
-						super(proxy);
-					}
-
-					public void write(byte[] bts, int st, int end)
-							throws IOException {
-
-						// FIXME Put your progress bar stuff here!
-
-						out.write(bts, st, end);
-					}
-				}
-
-				yourEntity.writeTo(new ProgressiveOutputStream(outstream));
-			}
-
-		}
-		;
-		ProgressiveEntity myEntity = new ProgressiveEntity();
-
-		post.setEntity(myEntity);
-		HttpResponse response = client.execute(post);
-
-		return getContent(response);
-
-	}
-
-	public static String getContent(HttpResponse response) throws IOException {
-		BufferedReader rd = new BufferedReader(new InputStreamReader(response
-				.getEntity().getContent()));
-		String body = "";
-		String content = "";
-
-		while ((body = rd.readLine()) != null) {
-			content += body + "\n";
-		}
-		return content.trim();
 	}
 
 }
